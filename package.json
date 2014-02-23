@@ -1,0 +1,44 @@
+{
+  "name": "thingspeakclient",
+  "version": "0.2.0",
+  "description": "node.js Client for ThingSpeak",
+  "main": "thingspeakclient.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/imwebgefunden/thingspeakclient_node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/imwebgefunden/thingspeakclient_node/issues"
+  },
+  "homepage": "https://github.com/imwebgefunden/thingspeakclient_node",
+  "author": "Thomas Schneider",
+  "devDependencies": {
+    "grunt": "~0.4.2",
+    "grunt-jsbeautifier": "~0.2.6",
+    "grunt-contrib-jshint": "~0.8.0",
+    "grunt-contrib-nodeunit": "~0.2.2",
+    "grunt-todo": "~0.1.0",
+    "grunt-jsdoc": "~0.5.1",
+    "sinon": "~1.8.2",
+    "should": "~3.1.2",
+    "grunt-mocha-test": "~0.9.0"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "keywords": [
+    "thingspeak",
+    "iot",
+    "IoT",
+    "sensor"
+  ],
+  "license": "GPL-3.0",
+  "dependencies": {
+    "async": "~0.2.10",
+    "underscore": "~1.6.0",
+    "request": "~2.34.0"
+  }
+}
