@@ -84,7 +84,7 @@ describe('ThinkSpeakClient Channel Update Tests', function() {
 
     });
 
-    describe('separated check without writeKey on update call', function() {
+    describe('isolated check without writeKey on update call', function() {
         var client = new ThingSpeakClient();
 
         before(function(done) {
@@ -109,8 +109,10 @@ describe('ThinkSpeakClient Channel Update Tests', function() {
         });
     });
 
-    describe('successfully update call', function() {
-        var client = new ThingSpeakClient();
+    describe('successfully update call in useTimeoutMode false', function() {
+        var client = new ThingSpeakClient({
+            useTimeoutMode: false
+        });
 
         before(function(done) {
             client.attachChannel(123456, {
@@ -160,4 +162,65 @@ describe('ThinkSpeakClient Channel Update Tests', function() {
             });
         });
     });
+
+    describe('successfully update call in useTimeoutMode true', function() {
+        // because async.queue can't be tested with simon fakeTimers we have to go another way :(
+        var client = new ThingSpeakClient({
+            updateTimeout: 500
+        });
+
+        before(function(done) {
+            client.attachChannel(123456, {
+                'writeKey': 'you'
+            });
+            done();
+
+        });
+
+        after(function(done) {
+            done();
+        });
+
+        it('should give an value greater than 0 if update was successfully', function(done) {
+            var firstCallTime;
+            client.updateChannel(123456, {
+                'status': 'live'
+            }, function(err, response) {
+                firstCallTime = client.channels[123456].lastUpdate;
+                should(err).not.Error;
+                stub.callCount.should.eql(3);
+                var callArgs = stub.getCall(2).args[0];
+                callArgs.should.have.property('url', 'https://api.thingspeak.com/update');
+                callArgs.should.have.property('form', {
+                    status: 'live'
+                });
+                callArgs.should.have.property('headers', {
+                    'X-THINGSPEAKAPIKEY': 'you'
+                });
+                response.should.be.a.Number.and.greaterThan(0).and.eql(7);
+            });
+            // now make the second call
+            client.channels[123456].updateQueue.length().should.eql(1); // the first call is in progress
+            client.updateChannel(123456, {
+                'status': 'update'
+            }, function(err, response) {
+                var timeDiff = client.channels[123456].lastUpdate - firstCallTime;
+                timeDiff.should.be.greaterThan(500);
+                //console.log(timeDiff);
+                should(err).not.Error;
+                stub.callCount.should.eql(4);
+                var callArgs = stub.getCall(3).args[0];
+                callArgs.should.have.property('url', 'https://api.thingspeak.com/update');
+                callArgs.should.have.property('form', {
+                    status: 'update'
+                });
+                callArgs.should.have.property('headers', {
+                    'X-THINGSPEAKAPIKEY': 'you'
+                });
+                response.should.be.a.Number.and.greaterThan(0).and.eql(7);
+                done();
+            });
+        });
+    });
+
 });

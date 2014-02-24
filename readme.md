@@ -1,4 +1,4 @@
-# ThinkSpeak-Client for node.js
+# ThingSpeak-Client for node.js
 ---
 
 A client for updating and reading channels and fields on [ThingSpeak](http://www.thingspeak.com) or your own [ThingSpeak-Installation](https://github.com/iobridge/thingspeak).
@@ -28,6 +28,23 @@ The default ThinkSpeak-URL is ```https://api.thingspeak.com```. You can change t
 
 ```
 var client = new ThingSpeakClient({server:'http://localhost:8000'});
+```
+#### Updatemode and update timeout settings
+The open service via [ThingSpeak.com](http://www.thingspeak.com) has a rate limit of an update per channel every 15 seconds.
+If you update to fast the channel isn't updated and you get an return value of 0 from an update request. To handle this situation
+the client has two major modes:
+
+* ```useTimeoutMode: false``` - Every update request will be immediately forwarded to the server. If you are to fast your channel isn't updated.
+* ```useTimeoutMode: true``` - This is the default mode. Every update request to a single channel is queued and will be forwarded to the server after a timeout to the previously update request.
+ If the queue is empty the request will be forwarded immediately. The default timeout value is 15 seconds between two update requests to the same
+ channel. You can put your data in the queue as fast as you get the data. With the default update period of 15 seconds for example four updates are finished after a minute.
+ Because every channel has an own update queue with own timer the updates between channels are not interfered. As an example: If the update queue for channel A has currently
+ three requests and the queue for channel B is empty - a new request for B is forwarded immediately.
+
+Changing the mode and the timeout values:
+```
+var client = new ThingSpeakClient({useTimeoutMode:false}); - disable client timeout handling between update request per channel
+var client = new ThingSpeakClient({updateTimeout:20000}); - set the timeout to 20s (Note: 15 seconds is the default value), the timeout value is in milliseconds
 ```
 
 ### Attach a channel to the client

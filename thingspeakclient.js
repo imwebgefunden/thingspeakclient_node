@@ -26,9 +26,12 @@ var util = require('util');
 var events = require('events');
 var request = require('request');
 var _ = require('underscore');
+var async = require('async');
 
 var defaultOptions = {
-    'server': 'https://api.thingspeak.com'
+    server: 'https://api.thingspeak.com',
+    useTimeoutMode: true,
+    updateTimeout: 15000
 };
 
 /**
@@ -70,6 +73,24 @@ ThingSpeakClient.prototype.attachChannel = function(channelId, keys, callback) {
             } else {
                 data = keys;
                 self.channels[channelId] = data;
+                // create a queue for update requests
+                if (self.options.useTimeoutMode) {
+                    self.channels[channelId].updateQueue = async.queue(function(task, callback) {
+                        request.post({
+                            url: task.url,
+                            form: task.form,
+                            headers: task.headers
+                        }, function(err, response, body) {
+                            if ((!err) && (body > 0)) {
+                                self.channels[task.id].lastUpdate = +new Date();
+                            }
+                            if (_.isFunction(task.cB)) {
+                                task.cB(err, body);
+                            }
+                        });
+                        setTimeout(callback, self.options.updateTimeout);
+                    }, 1);
+                }
             }
         } else {
             err = new Error('no keys given for attach channel');
@@ -133,17 +154,32 @@ ThingSpeakClient.prototype.updateChannel = function(id, fields, callback) {
         data = fields;
     }
 
-    request.post({
-        url: url,
-        form: data,
-        headers: {
-            'X-THINGSPEAKAPIKEY': self.channels[id].writeKey
-        }
-    }, function(err, response, body) {
-        if (_.isFunction(callback)) {
-            callback(err, body);
-        }
-    });
+    if (self.options.useTimeoutMode) {
+        self.channels[id].updateQueue.push({
+            id: id,
+            url: url,
+            form: data,
+            headers: {
+                'X-THINGSPEAKAPIKEY': self.channels[id].writeKey
+            },
+            cB: callback
+        });
+    } else {
+        request.post({
+            url: url,
+            form: data,
+            headers: {
+                'X-THINGSPEAKAPIKEY': self.channels[id].writeKey
+            }
+        }, function(err, response, body) {
+            if ((!err) && (body > 0)) {
+                self.channels[id].lastUpdate = +new Date();
+            }
+            if (_.isFunction(callback)) {
+                callback(err, body);
+            }
+        });
+    }
 };
 
 /**

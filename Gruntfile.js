@@ -7,12 +7,12 @@ module.exports = function(grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
         "jsbeautifier": {
-            files: ["*.js", "lib/**/*.js", "examples/**/*.js", "addons/**/*.js", "test/**/*.js", "config/**/*.json"],
+            files: ["*.js", "lib/**/*.js", "examples/**/*.js", "playground/**/*.js", "addons/**/*.js", "test/**/*.js", "config/**/*.json"],
             options: {}
         },
         jshint: {
             //all: ['*.js', "lib/**/*.js", 'examples/**/*.js', "addons/**/*.js", 'test/**/*.js', "config/**/*.json"]
-            all: ['*.js', "lib/**/*.js", 'examples/**/*.js', "addons/**/*.js", "config/**/*.json"]
+            all: ['*.js', "lib/**/*.js", 'examples/**/*.js', "playground/**/*.js", "addons/**/*.js", "config/**/*.json"]
         },
         nodeunit: {
             all: ['test/nu_tests/*.js']
@@ -22,7 +22,7 @@ module.exports = function(grunt) {
         },
         todo: {
             options: {},
-            src: ["*.js", "lib/**/*.js", "examples/**/*.js", "addons/**/*.js", "test/**/*.js"]
+            src: ["*.js", "lib/**/*.js", "examples/**/*.js", "playground/**/*.js", "addons/**/*.js", "test/**/*.js"]
         },
         jsdoc: {
             dist: {
