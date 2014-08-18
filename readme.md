@@ -79,7 +79,7 @@ client.updateChannel(4711, {field1: 7, field2: 6}, function(err, resp) {
     if (!err && resp > 0) {
         console.log('update successfully. Entry number was: ' + resp);
     }
-};
+});
 ```
 
 ### Reading data
